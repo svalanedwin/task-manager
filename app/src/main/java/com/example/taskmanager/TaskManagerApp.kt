@@ -1,11 +1,14 @@
 package com.example.taskmanager
 
-import AddTaskScreen
+
 import TaskDetailsScreen
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.taskmanager.ui.AddTaskScreen
+import com.example.taskmanager.ui.TaskListScreen
+import com.example.taskmanager.viewmodel.TaskViewModel
 
 @Composable
 fun TaskManagerApp(viewModel: TaskViewModel) {

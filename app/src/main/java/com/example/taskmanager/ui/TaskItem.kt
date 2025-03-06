@@ -1,4 +1,4 @@
-package com.example.taskmanager
+package com.example.taskmanager.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -6,6 +6,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.taskmanager.model.Task
 
 @Composable
 fun TaskItem(task: Task, onTaskClicked: () -> Unit) {

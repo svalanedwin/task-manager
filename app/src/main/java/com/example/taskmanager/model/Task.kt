@@ -1,9 +1,9 @@
-package com.example.taskmanager
+package com.example.taskmanager.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "task")
+@Entity(tableName = "tasks")
 data class Task(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val title: String,
