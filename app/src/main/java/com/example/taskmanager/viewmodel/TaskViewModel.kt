@@ -82,18 +82,6 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch { repository.update(updatedTask) }
     }
 
-    fun addTask(task: Task) {
-        viewModelScope.launch {
-            repository.insert(task)
-            repository.saveTaskToCloud(task) // ✅ Sync to Firebase
-        }
-    }
 
-    fun deleteTask(task: Task) {
-        viewModelScope.launch {
-            repository.delete(task)
-            repository.deleteTaskFromCloud(task.id) // ✅ Remove from Firebase
-        }
-    }
 
 }

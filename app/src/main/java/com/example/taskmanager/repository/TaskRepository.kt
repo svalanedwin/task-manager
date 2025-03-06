@@ -2,13 +2,10 @@ package com.example.taskmanager.repository
 
 import com.example.taskmanager.data.TaskDao
 import com.example.taskmanager.model.Task
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.Flow
 
 class TaskRepository(private val taskDao: TaskDao) {
-    private val db = Firebase.firestore
-    private val taskCollection = db.collection("tasks")
+
     val allTasks: Flow<List<Task>> = taskDao.getAllTasks()
 
     fun getTasksByStatus(completed: Boolean): Flow<List<Task>> {
@@ -33,12 +30,4 @@ class TaskRepository(private val taskDao: TaskDao) {
         return taskDao.getAllTasksSortedByDueDate()
     }
 
-
-    fun saveTaskToCloud(task: Task) {
-        taskCollection.document(task.id.toString()).set(task)
-    }
-
-    fun deleteTaskFromCloud(taskId: Int) {
-        taskCollection.document(taskId.toString()).delete()
-    }
 }
