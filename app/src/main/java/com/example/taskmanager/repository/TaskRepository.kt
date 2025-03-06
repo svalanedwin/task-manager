@@ -6,28 +6,12 @@ import kotlinx.coroutines.flow.Flow
 
 class TaskRepository(private val taskDao: TaskDao) {
 
-    val allTasks: Flow<List<Task>> = taskDao.getAllTasks()
+    fun getAllTasks(): Flow<List<Task>> = taskDao.getAllTasks()
+    fun getPendingTasks(): Flow<List<Task>> = taskDao.getPendingTasks()
+    fun getCompletedTasks(): Flow<List<Task>> = taskDao.getCompletedTasks()
 
-    fun getTasksByStatus(completed: Boolean): Flow<List<Task>> {
-        return taskDao.getTasksByStatus(completed)
-    }
-
-    suspend fun insert(task: Task) {
-        taskDao.insertTask(task)
-    }
-
-    suspend fun update(task: Task) {
-        taskDao.updateTask(task)
-    }
-
-    suspend fun delete(task: Task) {
-        taskDao.deleteTask(task)
-    }
-    fun getAllTasksSortedByPriority(): Flow<List<Task>> {
-        return taskDao.getAllTasksSortedByPriority()
-    }
-    fun getAllTasksSortedByDueDate(): Flow<List<Task>> {
-        return taskDao.getAllTasksSortedByDueDate()
-    }
-
+    suspend fun addTask(task: Task) = taskDao.insertTask(task)
+    suspend fun updateTask(task: Task) = taskDao.updateTask(task)
+    suspend fun deleteTask(task: Task) = taskDao.deleteTask(task)
+    suspend fun deleteAllCompletedTasks() = taskDao.deleteAllCompletedTasks()
 }

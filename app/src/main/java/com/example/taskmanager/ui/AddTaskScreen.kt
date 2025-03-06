@@ -1,102 +1,117 @@
 package com.example.taskmanager.ui
+
+import android.app.DatePickerDialog
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.example.taskmanager.model.Priority
 import com.example.taskmanager.model.Task
 import com.example.taskmanager.viewmodel.TaskViewModel
+import java.text.SimpleDateFormat
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun AddTaskScreen(viewModel: TaskViewModel, navController: NavController) {
+fun AddTaskScreen(
+    viewModel: TaskViewModel,
+    onTaskSaved: () -> Unit
+) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var priority by remember { mutableStateOf(Priority.MEDIUM) }
-    var expanded by remember { mutableStateOf(false) }
-    val keyboardController = LocalSoftwareKeyboardController.current
+    var dueDate by remember { mutableStateOf(System.currentTimeMillis()) }
+
+    // Use the custom rememberDatePickerDialog
+    val datePickerDialog = rememberDatePickerDialog { selectedDate ->
+        dueDate = selectedDate
+    }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Add Task") }) }
+        topBar = { TopAppBar(title = { Text("New Task") }) },
+        floatingActionButton = {
+            FloatingActionButton(onClick = {
+                if (title.isNotBlank()) {
+                    val newTask = Task(
+                        title = title,
+                        description = description.takeIf { it.isNotBlank() },
+                        priority = priority,
+                        dueDate = dueDate
+                    )
+                    viewModel.addTask(newTask)
+                    onTaskSaved()
+                }
+            }) {
+                Icon(Icons.Default.Check, contentDescription = "Save Task")
+            }
+        }
     ) { padding ->
         Column(
             modifier = Modifier
-                .fillMaxSize() // Ensure focus is handled properly
+                .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Title input
             TextField(
                 value = title,
                 onValueChange = { title = it },
-                label = { Text("Title") },
-                keyboardOptions = KeyboardOptions.Default,
-                keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() }),
-                modifier = Modifier.fillMaxWidth()
+                label = { Text("Title") }
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Description input
             TextField(
                 value = description,
                 onValueChange = { description = it },
-                label = { Text("Description") },
-                keyboardOptions = KeyboardOptions.Default,
-                keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() }),
-                modifier = Modifier.fillMaxWidth()
+                label = { Text("Description (optional)") }
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Priority dropdown
-            Box(modifier = Modifier.fillMaxWidth()) {
-                Button(
-                    onClick = { expanded = true },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Priority: ${priority.name}")
-                }
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    Priority.values().forEach {
-                        DropdownMenuItem(
-                            text = { Text(it.name) },
-                            onClick = {
-                                priority = it
-                                expanded = false
-                            }
-                        )
-                    }
-                }
+            PrioritySelector(priority) { priority = it }
+            Button(onClick = { datePickerDialog.show() }) {
+                Text("Pick Due Date: ${SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(dueDate))}")
             }
+        }
+    }
+}
 
-            Spacer(modifier = Modifier.height(16.dp))
+@Composable
+fun rememberDatePickerDialog(
+    onDateSelected: (Long) -> Unit
+): DatePickerDialog {
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance()
 
-            // Save button
+    return remember {
+        DatePickerDialog(
+            context,
+            { _, year, month, day ->
+                calendar.set(year, month, day)
+                onDateSelected(calendar.timeInMillis)
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+    }
+}
+
+@Composable
+fun PrioritySelector(selectedPriority: Priority, onPrioritySelected: (Priority) -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        Priority.values().forEach { priority ->
             Button(
-                onClick = {
-                    val task = Task(
-                        title = title,
-                        description = description,
-                        priority = priority,
-                        dueDate = Calendar.getInstance().timeInMillis
-                    )
-                    viewModel.insert(task)
-                    navController.popBackStack()
-                },
-                modifier = Modifier.fillMaxWidth()
+                onClick = { onPrioritySelected(priority) },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (priority == selectedPriority) Color.Blue else Color.Gray
+                )
             ) {
-                Text("Save")
+                Text(priority.name)
             }
         }
     }

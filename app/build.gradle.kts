@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.taskmanager"
-        minSdk = 24
+        minSdk = 25 // Updated to 25
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -63,6 +63,12 @@ dependencies {
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.protolite.well.known.types)
+    implementation(libs.androidx.storage)
+    implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.datastore.core.android)
+    implementation(libs.androidx.datastore.preferences.core.jvm)
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
     kapt(libs.androidx.room.compiler) // Use kapt directly here
 
     // Test dependencies
