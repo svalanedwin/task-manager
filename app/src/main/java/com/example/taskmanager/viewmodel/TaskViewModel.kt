@@ -62,4 +62,11 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
             workRequest
         )
     }
+    fun getSortedTasks(sortType: String): LiveData<List<Task>> {
+        return when (sortType) {
+            "Priority" -> repository.getAllTasksSortedByPriority().asLiveData()
+            "Due Date" -> repository.getAllTasksSortedByDueDate().asLiveData()
+            else -> allTasks
+        }
+    }
 }

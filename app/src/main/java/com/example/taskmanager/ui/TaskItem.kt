@@ -18,8 +18,20 @@ fun TaskItem(task: Task, onTaskClicked: () -> Unit) {
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = task.title, style = MaterialTheme.typography.titleMedium)
-            Text(text = task.description ?: "", style = MaterialTheme.typography.bodyMedium)
+            // Title Text
+            Text(
+                text = task.title,
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis // Adding truncation if text overflows
+            )
+            // Description Text
+            Text(
+                text = task.description ?: "No description available",
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 2,  // Ensures that the description doesn't overflow too much
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+            )
         }
     }
 }

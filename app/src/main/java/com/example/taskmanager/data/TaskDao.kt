@@ -13,6 +13,12 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE isCompleted = :completed ORDER BY dueDate ASC")
     fun getTasksByStatus(completed: Boolean): Flow<List<Task>>
 
+    @Query("SELECT * FROM tasks ORDER BY priority DESC")
+    fun getAllTasksSortedByPriority(): Flow<List<Task>>
+
+    @Query("SELECT * FROM tasks ORDER BY dueDate ASC")
+    fun getAllTasksSortedByDueDate(): Flow<List<Task>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTask(task: Task)
 
@@ -21,4 +27,6 @@ interface TaskDao {
 
     @Delete
     suspend fun deleteTask(task: Task)
+
+
 }

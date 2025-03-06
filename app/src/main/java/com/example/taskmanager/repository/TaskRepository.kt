@@ -23,4 +23,10 @@ class TaskRepository(private val taskDao: TaskDao) {
     suspend fun delete(task: Task) {
         taskDao.deleteTask(task)
     }
+    fun getAllTasksSortedByPriority(): Flow<List<Task>> {
+        return taskDao.getAllTasksSortedByPriority()
+    }
+    fun getAllTasksSortedByDueDate(): Flow<List<Task>> {
+        return taskDao.getAllTasksSortedByDueDate()
+    }
 }
