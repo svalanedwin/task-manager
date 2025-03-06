@@ -35,9 +35,13 @@ fun TaskListScreen(viewModel: TaskViewModel, navController: NavController) {
             } else {
                 LazyColumn {
                     items(tasks) { task ->
-                        TaskItem(task = task, onComplete = { updatedTask ->
-                            viewModel.update(updatedTask)
-                        })
+                        TaskItem(
+                            task = task,
+                            onComplete = { updatedTask ->
+                                viewModel.update(updatedTask)
+                            },
+                            onTaskClick = { navController.navigate(Screen.TaskDetails.createRoute(task.id)) }
+                        )
                     }
                 }
             }
@@ -46,12 +50,12 @@ fun TaskListScreen(viewModel: TaskViewModel, navController: NavController) {
 }
 
 @Composable
-fun TaskItem(task: Task, onComplete: (Task) -> Unit) {
+fun TaskItem(task: Task, onComplete: (Task) -> Unit, onTaskClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
-            .clickable { onComplete(task.copy(isCompleted = !task.isCompleted)) },
+            .clickable { onTaskClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(modifier = Modifier.padding(16.dp)) {
@@ -67,3 +71,4 @@ fun TaskItem(task: Task, onComplete: (Task) -> Unit) {
         }
     }
 }
+
