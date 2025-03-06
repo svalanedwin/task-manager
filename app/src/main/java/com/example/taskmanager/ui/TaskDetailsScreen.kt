@@ -16,6 +16,9 @@ fun TaskDetailsScreen(task: Task, viewModel: TaskViewModel, navController: NavCo
     var title by remember { mutableStateOf(task.title) }
     var description by remember { mutableStateOf(task.description ?: "") }
     var priority by remember { mutableStateOf(task.priority) }
+    val repeatOptions = listOf("None", "Daily", "Weekly")
+    var selectedOption by remember { mutableStateOf("None") }
+    var dropdownExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -44,6 +47,53 @@ fun TaskDetailsScreen(task: Task, viewModel: TaskViewModel, navController: NavCo
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+            Text("Reminder Frequency:")
+
+            //  Fixed Dropdown Menu
+            ExposedDropdownMenuBox(
+                expanded = dropdownExpanded,
+                onExpandedChange = { dropdownExpanded = !dropdownExpanded }
+            ) {
+                TextField(
+                    value = selectedOption,
+                    onValueChange = {},
+                    readOnly = true,
+                    modifier = Modifier
+                        .menuAnchor()  //  Required for correct dropdown alignment
+                        .fillMaxWidth(),
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded)
+                    }
+                )
+                ExposedDropdownMenu(
+                    expanded = dropdownExpanded,
+                    onDismissRequest = { dropdownExpanded = false }
+                ) {
+                    repeatOptions.forEach { option ->
+                        DropdownMenuItem(
+                            text = { Text(option) },
+                            onClick = {
+                                selectedOption = option
+                                dropdownExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = {
+                val interval = when (selectedOption) {
+                    "Daily" -> 1L
+                    "Weekly" -> 7L
+                    else -> return@Button
+                }
+                viewModel.scheduleRecurringTask(task, interval)
+            }) {
+                Text("Save Reminder")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
             Row {
                 Button(
                     onClick = {
@@ -52,7 +102,7 @@ fun TaskDetailsScreen(task: Task, viewModel: TaskViewModel, navController: NavCo
                     },
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text("Save")
+                    Text("Save Task")
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Button(
@@ -63,9 +113,10 @@ fun TaskDetailsScreen(task: Task, viewModel: TaskViewModel, navController: NavCo
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text("Delete")
+                    Text("Delete Task")
                 }
             }
         }
     }
 }
+

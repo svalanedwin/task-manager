@@ -2,10 +2,17 @@ package com.example.taskmanager.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.*
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.example.taskmanager.data.TaskDatabase
 import com.example.taskmanager.model.Task
+import com.example.taskmanager.notifications.TaskNotificationWorker
 import com.example.taskmanager.repository.TaskRepository
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 
 class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -35,5 +42,24 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     }
     fun toggleTheme() {
         _isDarkTheme.value = _isDarkTheme.value?.not()
+    }
+    fun scheduleTaskNotification(task: Task) {
+        val workRequest = OneTimeWorkRequestBuilder<TaskNotificationWorker>()
+            .setInitialDelay(task.dueDate - System.currentTimeMillis(), TimeUnit.MILLISECONDS)
+            .setInputData(workDataOf("task_title" to task.title))
+            .build()
+
+        WorkManager.getInstance(getApplication()).enqueue(workRequest)
+    }
+    fun scheduleRecurringTask(task: Task, repeatInterval: Long) {
+        val workRequest = PeriodicWorkRequestBuilder<TaskNotificationWorker>(repeatInterval, TimeUnit.DAYS)
+            .setInputData(workDataOf("task_title" to task.title))
+            .build()
+
+        WorkManager.getInstance(getApplication()).enqueueUniquePeriodicWork(
+            task.id.toString(),
+            ExistingPeriodicWorkPolicy.UPDATE,
+            workRequest
+        )
     }
 }
