@@ -12,6 +12,10 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: TaskRepository
     val allTasks: LiveData<List<Task>>
 
+    private val _isDarkTheme = MutableLiveData(false)
+    val isDarkTheme: LiveData<Boolean> get() = _isDarkTheme
+
+
     init {
         val taskDao = TaskDatabase.getDatabase(application).taskDao()
         repository = TaskRepository(taskDao)
@@ -28,5 +32,8 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
     fun delete(task: Task) = viewModelScope.launch {
         repository.delete(task)
+    }
+    fun toggleTheme() {
+        _isDarkTheme.value = _isDarkTheme.value?.not()
     }
 }
