@@ -4,11 +4,15 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.taskmanager.model.Priority
 import com.example.taskmanager.model.Task
+import com.example.taskmanager.utils.ShareUtils
 import com.example.taskmanager.viewmodel.TaskViewModel
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -19,7 +23,7 @@ fun TaskDetailsScreen(task: Task, viewModel: TaskViewModel, navController: NavCo
     val repeatOptions = listOf("None", "Daily", "Weekly")
     var selectedOption by remember { mutableStateOf("None") }
     var dropdownExpanded by remember { mutableStateOf(false) }
-
+    val context = LocalContext.current
     Scaffold(
         topBar = {
             TopAppBar(title = { Text("Edit Task") })
@@ -92,6 +96,16 @@ fun TaskDetailsScreen(task: Task, viewModel: TaskViewModel, navController: NavCo
             }) {
                 Text("Save Reminder")
             }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = {
+                    ShareUtils.shareTask(context, task)
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+               // modifier = Modifier.weight(1f)
+            ) {
+                Text("Share Task")
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
             Row {
@@ -117,6 +131,8 @@ fun TaskDetailsScreen(task: Task, viewModel: TaskViewModel, navController: NavCo
                 }
             }
         }
+
+
     }
 }
 

@@ -1,5 +1,6 @@
 package com.example.taskmanager.viewmodel
 
+import TaskStats
 import android.app.Application
 import androidx.lifecycle.*
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -69,4 +70,30 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
             else -> allTasks
         }
     }
+    fun getTaskCompletionStats(): LiveData<TaskStats> {
+        return allTasks.map { tasks ->
+            val completed = tasks.count { it.isCompleted }
+            val total = tasks.size
+            TaskStats(completed, total)
+        }
+    }
+    fun togglePin(task: Task) {
+        val updatedTask = task.copy(isPinned = !task.isPinned)
+        viewModelScope.launch { repository.update(updatedTask) }
+    }
+
+    fun addTask(task: Task) {
+        viewModelScope.launch {
+            repository.insert(task)
+            repository.saveTaskToCloud(task) // ✅ Sync to Firebase
+        }
+    }
+
+    fun deleteTask(task: Task) {
+        viewModelScope.launch {
+            repository.delete(task)
+            repository.deleteTaskFromCloud(task.id) // ✅ Remove from Firebase
+        }
+    }
+
 }

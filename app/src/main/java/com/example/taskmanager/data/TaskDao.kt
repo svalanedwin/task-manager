@@ -19,6 +19,10 @@ interface TaskDao {
     @Query("SELECT * FROM tasks ORDER BY dueDate ASC")
     fun getAllTasksSortedByDueDate(): Flow<List<Task>>
 
+    @Query("SELECT * FROM tasks ORDER BY isPinned DESC, priority DESC, dueDate ASC")
+    fun getAllTasksSorted(): Flow<List<Task>>
+
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTask(task: Task)
 

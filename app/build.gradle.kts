@@ -56,6 +56,7 @@ dependencies {
 
     // WorkManager dependency
     implementation("androidx.work:work-runtime-ktx:2.8.1") // ✅ Added WorkManager
+    implementation("com.google.firebase:firebase-firestore-ktx:24.0.1")
     // Room dependencies
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)

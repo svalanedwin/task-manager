@@ -2,14 +2,21 @@ package com.example.taskmanager.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.taskmanager.model.Task
+import com.example.taskmanager.viewmodel.TaskViewModel
 
 @Composable
-fun TaskItem(task: Task, onTaskClicked: () -> Unit) {
+fun TaskItem(task: Task, viewModel: TaskViewModel, onTaskClicked: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -32,6 +39,9 @@ fun TaskItem(task: Task, onTaskClicked: () -> Unit) {
                 maxLines = 2,  // Ensures that the description doesn't overflow too much
                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
             )
+            IconButton(onClick = {  viewModel.togglePin(task) }) {
+                Icon(imageVector = if (task.isPinned) Icons.Default.Favorite else Icons.Default.FavoriteBorder, contentDescription = "Pin Task")
+            }
         }
     }
 }

@@ -91,6 +91,7 @@ fun TaskListScreen(viewModel: TaskViewModel, navController: NavController) {
                         ) {
                             SwipeToDeleteTask(
                                 task = task,
+                                viewModel = viewModel,
                                 onDelete = { viewModel.delete(task) },
                                 onTaskClick = { navController.navigate(Screen.TaskDetails.createRoute(task.id)) },
                                 onComplete = { updatedTask -> viewModel.update(updatedTask) }
@@ -106,6 +107,7 @@ fun TaskListScreen(viewModel: TaskViewModel, navController: NavController) {
 @Composable
 fun SwipeToDeleteTask(
     task: Task,
+    viewModel: TaskViewModel,
     onDelete: () -> Unit,
     onTaskClick: () -> Unit,
     onComplete: (Task) -> Unit
@@ -127,6 +129,6 @@ fun SwipeToDeleteTask(
                 }
             }
     ) {
-        TaskItem(task = task, onTaskClicked = onTaskClick)
+        TaskItem(task = task, viewModel = viewModel, onTaskClicked = onTaskClick)
     }
 }
