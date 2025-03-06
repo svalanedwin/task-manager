@@ -1,13 +1,21 @@
 package com.example.taskmanager.ui
 
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.taskmanager.model.Task
@@ -34,14 +42,19 @@ fun TaskListScreen(viewModel: TaskViewModel, navController: NavController) {
                 Text("No tasks available", style = MaterialTheme.typography.bodyLarge)
             } else {
                 LazyColumn {
-                    items(tasks) { task ->
-                        TaskItem(
-                            task = task,
-                            onComplete = { updatedTask ->
-                                viewModel.update(updatedTask)
-                            },
-                            onTaskClick = { navController.navigate(Screen.TaskDetails.createRoute(task.id)) }
-                        )
+                    items(tasks, key = { it.id }) { task ->
+                        AnimatedVisibility(
+                            visible = true,
+                            enter = fadeIn(),
+                            exit = fadeOut()
+                        ) {
+                            SwipeToDeleteTask(
+                                task = task,
+                                onDelete = { viewModel.delete(task) },
+                                onTaskClick = { navController.navigate(Screen.TaskDetails.createRoute(task.id)) },
+                                onComplete = { updatedTask -> viewModel.update(updatedTask) }
+                            )
+                        }
                     }
                 }
             }
@@ -50,25 +63,29 @@ fun TaskListScreen(viewModel: TaskViewModel, navController: NavController) {
 }
 
 @Composable
-fun TaskItem(task: Task, onComplete: (Task) -> Unit, onTaskClick: () -> Unit) {
-    Card(
+fun SwipeToDeleteTask(
+    task: Task,
+    onDelete: () -> Unit,
+    onTaskClick: () -> Unit,
+    onComplete: (Task) -> Unit
+) {
+    var offsetX by remember { mutableStateOf(0f) }
+    val dismissThreshold = 300f  // Adjust swipe distance threshold
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .clickable { onTaskClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Row(modifier = Modifier.padding(16.dp)) {
-            Checkbox(
-                checked = task.isCompleted,
-                onCheckedChange = { onComplete(task.copy(isCompleted = it)) }
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Column {
-                Text(text = task.title, style = MaterialTheme.typography.titleMedium)
-                Text(text = "Priority: ${task.priority}", style = MaterialTheme.typography.bodySmall)
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures { _, dragAmount ->
+                    offsetX += dragAmount
+                    if (offsetX < -dismissThreshold) {
+                        onDelete()
+                    }
+                }
             }
-        }
+    ) {
+        TaskItem(task = task, onTaskClicked = onTaskClick)
     }
 }
-
