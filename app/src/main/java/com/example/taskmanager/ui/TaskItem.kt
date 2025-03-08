@@ -27,8 +27,8 @@ fun TaskItem(
             .fillMaxWidth()
             .padding(8.dp)
             .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(4.dp), // Corrected usage of elevation
-        shape = MaterialTheme.shapes.medium // Rounded corners for the card
+        elevation = CardDefaults.cardElevation(4.dp),
+        shape = MaterialTheme.shapes.medium
     ) {
         Column(
             modifier = Modifier
@@ -38,28 +38,32 @@ fun TaskItem(
                 text = task.title,
                 style = MaterialTheme.typography.titleMedium,
                 color = if (task.isCompleted) Color.Gray else MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(bottom = 4.dp) // Added spacing below title
+                modifier = Modifier.padding(bottom = 4.dp)
             )
 
-            // Conditional description rendering
             if (!task.description.isNullOrBlank()) {
                 Text(
                     text = task.description,
                     style = MaterialTheme.typography.bodyMedium,
                     color = if (task.isCompleted) Color.Gray else MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(bottom = 8.dp) // Added spacing below description
+                    modifier = Modifier.padding(bottom = 8.dp)
                 )
             }
 
-            // Due date display
             Text(
                 text = "Due: ${SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(task.dueDate))}",
                 style = MaterialTheme.typography.bodySmall,
                 color = if (task.isCompleted) Color.Gray else MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(top = 8.dp) // Added top padding for due date
+                modifier = Modifier.padding(top = 8.dp)
             )
 
-            // Strikethrough for completed task
+            Text(
+                text = "Priority: ${task.priority.name}",
+                style = MaterialTheme.typography.bodySmall,
+                color = if (task.isCompleted) Color.Gray else MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+
             if (task.isCompleted) {
                 Text(
                     text = "Completed",
@@ -67,7 +71,7 @@ fun TaskItem(
                     color = Color.Gray,
                     modifier = Modifier
                         .padding(top = 8.dp)
-                        .fillMaxWidth() // Makes the text take full width for better alignment
+                        .fillMaxWidth()
                         .clickable { onClick() }
                 )
             }

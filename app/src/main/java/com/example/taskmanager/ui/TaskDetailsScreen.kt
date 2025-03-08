@@ -36,6 +36,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.taskmanager.model.Task
 import com.example.taskmanager.viewmodel.TaskViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,6 +50,12 @@ fun TaskDetailsScreen(
     var title by remember { mutableStateOf(task.title) }
     var description by remember { mutableStateOf(task.description ?: "") }
     var isCompleted by remember { mutableStateOf(task.isCompleted) }
+    var priority by remember { mutableStateOf(task.priority) }
+    var dueDate by remember { mutableStateOf(task.dueDate) }
+
+    val datePickerDialog = rememberDatePickerDialog { selectedDate ->
+        dueDate = selectedDate
+    }
 
     Scaffold(
         topBar = {
@@ -98,6 +107,20 @@ fun TaskDetailsScreen(
                         label = { Text("Description") },
                         modifier = Modifier.fillMaxWidth()
                     )
+
+                    // Priority Selector
+                    PrioritySelector(priority) { priority = it }
+
+                    // Due Date Selector
+                    Button(
+                        onClick = { datePickerDialog.show() },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Pick Due Date: ${SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(
+                            Date(dueDate)
+                        )}")
+                    }
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -119,7 +142,7 @@ fun TaskDetailsScreen(
                 }
             }
 
-            // Buttons
+            // Save and Delete Buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
@@ -129,6 +152,8 @@ fun TaskDetailsScreen(
                         val updatedTask = task.copy(
                             title = title,
                             description = description.takeIf { it.isNotBlank() },
+                            priority = priority,
+                            dueDate = dueDate,
                             isCompleted = isCompleted
                         )
                         viewModel.updateTask(updatedTask)
@@ -153,3 +178,4 @@ fun TaskDetailsScreen(
         }
     }
 }
+

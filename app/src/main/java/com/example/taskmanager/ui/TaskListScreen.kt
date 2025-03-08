@@ -45,18 +45,22 @@ fun TaskListScreen(
     viewModel: TaskViewModel,
     onTaskClick: (String) -> Unit,
     onAddTaskClick: () -> Unit,
-    onSettingsClick: () -> Unit // ✅ Add settings navigation
+    onSettingsClick: () -> Unit
 ) {
     var selectedSort by remember { mutableStateOf("Priority") }
-    var expanded by remember { mutableStateOf(false) }
+    var selectedFilter by remember { mutableStateOf("All") }
+    var expandedSort by remember { mutableStateOf(false) }
+    var expandedFilter by remember { mutableStateOf(false) }
+
     val sortedTasks by viewModel.getSortedTasks(selectedSort).collectAsState(initial = emptyList())
-   // val tasks by viewModel.tasks.collectAsState()
+    val filteredTasks by viewModel.getFilteredTasks(selectedFilter).collectAsState(initial = sortedTasks)
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Task Manager") },
                 actions = {
-                    IconButton(onClick = onSettingsClick) { // ✅ Navigate to Settings
+                    IconButton(onClick = onSettingsClick) {
                         Icon(Icons.Default.Settings, contentDescription = "Settings")
                     }
                 }
@@ -73,28 +77,28 @@ fun TaskListScreen(
         ) {
             // Sort Dropdown
             ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = { expanded = it }
+                expanded = expandedSort,
+                onExpandedChange = { expandedSort = it }
             ) {
                 TextField(
                     value = selectedSort,
                     onValueChange = {},
                     label = { Text("Sort by") },
                     readOnly = true,
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSort) },
                     modifier = Modifier
                         .menuAnchor()
                         .fillMaxWidth()
-                        .clickable { expanded = !expanded }
+                        .clickable { expandedSort = !expandedSort }
                         .padding(8.dp)
                 )
-                ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                    listOf("Priority", "Due Date").forEach { option ->
+                ExposedDropdownMenu(expanded = expandedSort, onDismissRequest = { expandedSort = false }) {
+                    listOf("Priority", "Due Date", "Alphabetical").forEach { option ->
                         DropdownMenuItem(
                             text = { Text(option) },
                             onClick = {
                                 selectedSort = option
-                                expanded = false
+                                expandedSort = false
                             }
                         )
                     }
@@ -102,12 +106,43 @@ fun TaskListScreen(
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Task List
-            if (sortedTasks.isEmpty()) {
+            // Filter Dropdown
+            ExposedDropdownMenuBox(
+                expanded = expandedFilter,
+                onExpandedChange = { expandedFilter = it }
+            ) {
+                TextField(
+                    value = selectedFilter,
+                    onValueChange = {},
+                    label = { Text("Filter by") },
+                    readOnly = true,
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedFilter) },
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth()
+                        .clickable { expandedFilter = !expandedFilter }
+                        .padding(8.dp)
+                )
+                ExposedDropdownMenu(expanded = expandedFilter, onDismissRequest = { expandedFilter = false }) {
+                    listOf("All", "Completed", "Pending").forEach { option ->
+                        DropdownMenuItem(
+                            text = { Text(option) },
+                            onClick = {
+                                selectedFilter = option
+                                expandedFilter = false
+                            }
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Task List with Swipe to Delete
+            if (filteredTasks.isEmpty()) {
                 Text("No tasks available", style = MaterialTheme.typography.bodyLarge)
             } else {
                 LazyColumn {
-                    items(sortedTasks, key = { it.id }) { task ->
+                    items(filteredTasks, key = { it.id }) { task ->
                         SwipeToDeleteTask(
                             task = task,
                             viewModel = viewModel,
@@ -121,7 +156,6 @@ fun TaskListScreen(
         }
     }
 }
-
 
 @Composable
 fun SwipeToDeleteTask(
@@ -143,7 +177,7 @@ fun SwipeToDeleteTask(
                 detectHorizontalDragGestures { _, dragAmount ->
                     offsetX += dragAmount
                     if (offsetX < -dismissThreshold) {
-                        onDelete()
+                        onDelete() // Delete the task if swiped sufficiently
                     }
                 }
             }
@@ -151,4 +185,5 @@ fun SwipeToDeleteTask(
         TaskItem(task = task, onClick = onTaskClick)
     }
 }
+
 
