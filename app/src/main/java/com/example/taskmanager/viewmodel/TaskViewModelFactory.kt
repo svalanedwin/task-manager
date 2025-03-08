@@ -11,7 +11,7 @@ class TaskViewModelFactory(
     private val settingsRepository: SettingsRepository, // Additional dependency
     private val context: Context // Additional dependency
 ) : ViewModelProvider.Factory {
-
+    @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(TaskViewModel::class.java)) {
             return TaskViewModel(taskRepository, settingsRepository, context) as T
