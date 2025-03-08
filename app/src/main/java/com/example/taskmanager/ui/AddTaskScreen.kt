@@ -2,14 +2,17 @@ package com.example.taskmanager.ui
 
 import android.app.DatePickerDialog
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.taskmanager.model.Priority
 import com.example.taskmanager.model.Task
@@ -28,26 +31,32 @@ fun AddTaskScreen(
     var priority by remember { mutableStateOf(Priority.MEDIUM) }
     var dueDate by remember { mutableStateOf(System.currentTimeMillis()) }
 
-    // Use the custom rememberDatePickerDialog
     val datePickerDialog = rememberDatePickerDialog { selectedDate ->
         dueDate = selectedDate
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("New Task") }) },
+        topBar = {
+            TopAppBar(
+                title = { Text("New Task") },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+            )
+        },
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                if (title.isNotBlank()) {
-                    val newTask = Task(
-                        title = title,
-                        description = description.takeIf { it.isNotBlank() },
-                        priority = priority,
-                        dueDate = dueDate
-                    )
-                    viewModel.addTask(newTask)
-                    onTaskSaved()
+            FloatingActionButton(
+                onClick = {
+                    if (title.isNotBlank()) {
+                        val newTask = Task(
+                            title = title,
+                            description = description.takeIf { it.isNotBlank() },
+                            priority = priority,
+                            dueDate = dueDate
+                        )
+                        viewModel.addTask(newTask)
+                        onTaskSaved()
+                    }
                 }
-            }) {
+            ) {
                 Icon(Icons.Default.Check, contentDescription = "Save Task")
             }
         }
@@ -57,21 +66,53 @@ fun AddTaskScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            TextField(
-                value = title,
-                onValueChange = { title = it },
-                label = { Text("Title") }
-            )
-            TextField(
-                value = description,
-                onValueChange = { description = it },
-                label = { Text("Description (optional)") }
-            )
-            PrioritySelector(priority) { priority = it }
-            Button(onClick = { datePickerDialog.show() }) {
-                Text("Pick Due Date: ${SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(dueDate))}")
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = "Task Details",
+                        style = MaterialTheme.typography.titleLarge,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    OutlinedTextField(
+                        value = title,
+                        onValueChange = { title = it },
+                        label = { Text("Title") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    OutlinedTextField(
+                        value = description,
+                        onValueChange = { description = it },
+                        label = { Text("Description (optional)") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Text(
+                        text = "Priority",
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                    PrioritySelector(priority) { priority = it }
+
+                    Button(
+                        onClick = { datePickerDialog.show() },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Pick Due Date: ${SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(dueDate))}")
+                    }
+                }
             }
         }
     }
@@ -105,14 +146,18 @@ fun PrioritySelector(selectedPriority: Priority, onPrioritySelected: (Priority) 
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         Priority.values().forEach { priority ->
-            Button(
+            ElevatedButton(
                 onClick = { onPrioritySelected(priority) },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (priority == selectedPriority) Color.Blue else Color.Gray
+                colors = ButtonDefaults.elevatedButtonColors(
+                    containerColor = if (priority == selectedPriority) MaterialTheme.colorScheme.primary else Color.Gray
                 )
             ) {
-                Text(priority.name)
+                Text(
+                    text = priority.name,
+                    color = if (priority == selectedPriority) Color.White else Color.Black // Highlight selected text
+                )
             }
         }
     }
 }
+
