@@ -1,13 +1,25 @@
 package com.example.taskmanager.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.example.taskmanager.model.Task
+import com.example.taskmanager.notifications.TaskNotificationWorker
+import com.example.taskmanager.repository.SettingsRepository
 import com.example.taskmanager.repository.TaskRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 
-class TaskViewModel(private val repository: TaskRepository) : ViewModel() {
+class TaskViewModel(
+    private val repository: TaskRepository,
+    private val settingsRepository: SettingsRepository,
+    private val context: Context // Pass the context for WorkManager
+) : ViewModel() {
+
     private val _tasks = MutableStateFlow<List<Task>>(emptyList())
     val tasks: StateFlow<List<Task>> = _tasks.asStateFlow()
 
@@ -24,14 +36,27 @@ class TaskViewModel(private val repository: TaskRepository) : ViewModel() {
         return _tasks.value.find { it.id == taskId }
     }
 
+    // Add a new task and schedule a notification if enabled
     fun addTask(task: Task) {
-        viewModelScope.launch { repository.addTask(task) }
+        viewModelScope.launch {
+            repository.addTask(task)
+            if (settingsRepository.isNotificationsEnabledFlow.first()) {
+                scheduleNotification(task)
+            }
+        }
     }
 
+    // Update an existing task and reschedule a notification if enabled
     fun updateTask(task: Task) {
-        viewModelScope.launch { repository.updateTask(task) }
+        viewModelScope.launch {
+            repository.updateTask(task)
+            if (settingsRepository.isNotificationsEnabledFlow.first()) {
+                scheduleNotification(task)
+            }
+        }
     }
 
+    // Delete a task
     fun deleteTask(task: Task) {
         viewModelScope.launch {
             repository.deleteTask(task)
@@ -40,6 +65,22 @@ class TaskViewModel(private val repository: TaskRepository) : ViewModel() {
         }
     }
 
+    // Restore a deleted task
+    fun restoreTask(task: Task) {
+        viewModelScope.launch {
+            repository.addTask(task)
+        }
+    }
+
+    // Move a task in the list
+    fun moveTask(fromIndex: Int, toIndex: Int) {
+        val updatedList = _tasks.value.toMutableList().apply {
+            add(toIndex, removeAt(fromIndex))
+        }
+        _tasks.value = updatedList
+    }
+
+    // Get sorted tasks based on the selected sorting option
     fun getSortedTasks(sortBy: String): Flow<List<Task>> {
         return _tasks.map { tasks ->
             when (sortBy) {
@@ -62,5 +103,16 @@ class TaskViewModel(private val repository: TaskRepository) : ViewModel() {
             }
         }
     }
-}
 
+    // Schedule a notification for a task if the due date is in the future
+    private fun scheduleNotification(task: Task) {
+        if (task.dueDate > System.currentTimeMillis()) {
+            val delay = task.dueDate - System.currentTimeMillis()
+            val workRequest = OneTimeWorkRequestBuilder<TaskNotificationWorker>()
+                .setInputData(workDataOf("task_title" to task.title))
+                .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+                .build()
+            WorkManager.getInstance(context).enqueue(workRequest)
+        }
+    }
+}

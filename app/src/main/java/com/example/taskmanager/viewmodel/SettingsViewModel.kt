@@ -26,6 +26,10 @@ class SettingsViewModel(private val settingsRepository: SettingsRepository) : Vi
     val isCloudSyncEnabled: StateFlow<Boolean> = settingsRepository.isCloudSyncEnabledFlow
         .stateIn(viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = false)
 
+    // Loading State
+    val isLoading: StateFlow<Boolean> = settingsRepository.isLoadingFlow
+        .stateIn(viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = false)
+
     // Toggle Dark Mode
     fun toggleDarkMode(enabled: Boolean) {
         viewModelScope.launch {

@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 
 // Create a DataStore instance using preferencesDataStore delegate
@@ -16,6 +17,10 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "se
 class SettingsRepository(context: Context) {
 
     private val dataStore = context.dataStore
+
+    // Loading state
+    private val _isLoadingFlow = MutableStateFlow(false)
+    val isLoadingFlow: Flow<Boolean> = _isLoadingFlow
 
     companion object {
         val DARK_MODE_KEY = booleanPreferencesKey("dark_mode")
@@ -26,53 +31,73 @@ class SettingsRepository(context: Context) {
 
     // Save dark mode preference
     suspend fun saveDarkMode(enabled: Boolean) {
-        dataStore.edit { preferences ->
-            preferences[DARK_MODE_KEY] = enabled
+        _isLoadingFlow.value = true
+        try {
+            dataStore.edit { preferences ->
+                preferences[DARK_MODE_KEY] = enabled
+            }
+        } finally {
+            _isLoadingFlow.value = false
         }
     }
 
     // Get dark mode preference as Flow
     val isDarkModeFlow: Flow<Boolean> = dataStore.data
         .map { preferences ->
-            preferences[DARK_MODE_KEY] ?: false // Default to false if not set
+            preferences[DARK_MODE_KEY] ?: false
         }
 
     // Save theme preference
     suspend fun saveTheme(theme: String) {
-        dataStore.edit { preferences ->
-            preferences[THEME_KEY] = theme
+        _isLoadingFlow.value = true
+        try {
+            dataStore.edit { preferences ->
+                preferences[THEME_KEY] = theme
+            }
+        } finally {
+            _isLoadingFlow.value = false
         }
     }
 
     // Get theme preference as Flow
     val selectedThemeFlow: Flow<String> = dataStore.data
         .map { preferences ->
-            preferences[THEME_KEY] ?: "Blue" // Default to "Blue" if not set
+            preferences[THEME_KEY] ?: "Blue"
         }
 
     // Save notifications preference
     suspend fun saveNotifications(enabled: Boolean) {
-        dataStore.edit { preferences ->
-            preferences[NOTIFICATIONS_KEY] = enabled
+        _isLoadingFlow.value = true
+        try {
+            dataStore.edit { preferences ->
+                preferences[NOTIFICATIONS_KEY] = enabled
+            }
+        } finally {
+            _isLoadingFlow.value = false
         }
     }
 
     // Get notifications preference as Flow
     val isNotificationsEnabledFlow: Flow<Boolean> = dataStore.data
         .map { preferences ->
-            preferences[NOTIFICATIONS_KEY] ?: true // Default to true if not set
+            preferences[NOTIFICATIONS_KEY] ?: true
         }
 
     // Save cloud sync preference
     suspend fun saveCloudSync(enabled: Boolean) {
-        dataStore.edit { preferences ->
-            preferences[CLOUD_SYNC_KEY] = enabled
+        _isLoadingFlow.value = true
+        try {
+            dataStore.edit { preferences ->
+                preferences[CLOUD_SYNC_KEY] = enabled
+            }
+        } finally {
+            _isLoadingFlow.value = false
         }
     }
 
     // Get cloud sync preference as Flow
     val isCloudSyncEnabledFlow: Flow<Boolean> = dataStore.data
         .map { preferences ->
-            preferences[CLOUD_SYNC_KEY] ?: false // Default to false if not set
+            preferences[CLOUD_SYNC_KEY] ?: false
         }
 }

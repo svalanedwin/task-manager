@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
         val settingsViewModel = ViewModelProvider(this, SettingsViewModelFactory(settingsRepository))
             .get(SettingsViewModel::class.java)
 
-        val taskViewModel = ViewModelProvider(this, TaskViewModelFactory(taskRepository))
+        val taskViewModel = ViewModelProvider(this, TaskViewModelFactory(taskRepository,settingsRepository,applicationContext))
             .get(TaskViewModel::class.java)
 
         setContent {
