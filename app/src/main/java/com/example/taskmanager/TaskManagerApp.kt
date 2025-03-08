@@ -18,7 +18,6 @@ fun TaskManagerApp(taskViewModel: TaskViewModel, settingsViewModel: SettingsView
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = "taskList") {
-        // ✅ Task List Screen
         composable("taskList") {
             TaskListScreen(
                 viewModel = taskViewModel,
@@ -28,13 +27,12 @@ fun TaskManagerApp(taskViewModel: TaskViewModel, settingsViewModel: SettingsView
                 onAddTaskClick = {
                     navController.navigate("addTask")
                 },
-                onSettingsClick = { // ✅ Navigate to Settings
+                onSettingsClick = {
                     navController.navigate("settings")
                 }
             )
         }
 
-        // ✅ Add Task Screen
         composable("addTask") {
             AddTaskScreen(
                 viewModel = taskViewModel,
@@ -44,10 +42,9 @@ fun TaskManagerApp(taskViewModel: TaskViewModel, settingsViewModel: SettingsView
             )
         }
 
-        // ✅ Task Details Screen
         composable("taskDetails/{taskId}") { backStackEntry ->
-            val taskId = backStackEntry.arguments?.getString("taskId") // Use String for taskId
-            val task = taskViewModel.tasks.value?.find { it.id == taskId } // Find task by String ID
+            val taskId = backStackEntry.arguments?.getString("taskId")
+            val task = taskViewModel.tasks.value?.find { it.id == taskId }
 
             if (task != null) {
                 TaskDetailsScreen(
@@ -62,11 +59,10 @@ fun TaskManagerApp(taskViewModel: TaskViewModel, settingsViewModel: SettingsView
             }
         }
 
-        // ✅ Settings Screen (NEW)
         composable("settings") {
             SettingsScreen(
                 viewModel = settingsViewModel,
-                onBack = { navController.popBackStack() } // ✅ Back navigation
+                onBack = { navController.popBackStack() }
             )
         }
     }

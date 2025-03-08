@@ -51,14 +51,16 @@ fun TaskDetailsScreen(
                         isCompleted = isCompleted
                     )
                     viewModel.updateTask(updatedTask)
-                    onBack()
+                    onBack() // Navigate back after saving
                 }) {
                     Text("Save")
                 }
                 Button(
                     onClick = {
-                        viewModel.deleteTask(task)
                         onBack()
+                        viewModel.deleteTask(task)
+                        println("Task deleted, navigating back")
+                         // Navigate back after deletion
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
                 ) {

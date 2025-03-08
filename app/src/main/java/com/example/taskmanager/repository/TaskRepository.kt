@@ -10,6 +10,8 @@ class TaskRepository(private val taskDao: TaskDao) {
     fun getPendingTasks(): Flow<List<Task>> = taskDao.getPendingTasks()
     fun getCompletedTasks(): Flow<List<Task>> = taskDao.getCompletedTasks()
 
+    fun getTaskById(taskId: String): Flow<Task?> = taskDao.getTaskById(taskId)  // ✅ New function
+
     suspend fun addTask(task: Task) = taskDao.insertTask(task)
     suspend fun updateTask(task: Task) = taskDao.updateTask(task)
     suspend fun deleteTask(task: Task) = taskDao.deleteTask(task)

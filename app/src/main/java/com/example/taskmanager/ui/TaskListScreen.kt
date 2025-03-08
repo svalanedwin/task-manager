@@ -50,7 +50,7 @@ fun TaskListScreen(
     var selectedSort by remember { mutableStateOf("Priority") }
     var expanded by remember { mutableStateOf(false) }
     val sortedTasks by viewModel.getSortedTasks(selectedSort).collectAsState(initial = emptyList())
-
+   // val tasks by viewModel.tasks.collectAsState()
     Scaffold(
         topBar = {
             TopAppBar(

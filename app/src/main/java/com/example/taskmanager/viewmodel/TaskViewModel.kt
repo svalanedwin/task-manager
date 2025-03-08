@@ -33,15 +33,24 @@ class TaskViewModel(private val repository: TaskRepository) : ViewModel() {
     }
 
     fun deleteTask(task: Task) {
-        viewModelScope.launch { repository.deleteTask(task) }
+        viewModelScope.launch {
+            repository.deleteTask(task)
+            _tasks.value = _tasks.value.filter { it.id != task.id } // Update the state
+            println("Task deleted, updated tasks: ${_tasks.value.size} tasks") // Add logging
+        }
     }
 
     fun getSortedTasks(sortBy: String): Flow<List<Task>> {
-        return when (sortBy) {
-            "Priority" -> _tasks.map { it.sortedBy { task -> task.priority } }
-            "Due Date" -> _tasks.map { it.sortedBy { task -> task.dueDate } }
-            else -> _tasks
+        return _tasks.map { tasks ->
+            when (sortBy) {
+                "Priority" -> tasks.sortedByDescending { it.priority } // Sort by priority (HIGH first)
+                "Due Date" -> tasks.sortedBy { it.dueDate } // Sort by due date (earliest first)
+                else -> tasks // Default sorting
+            }
         }
+    }
+    fun getTaskByIdLive(taskId: String): Flow<Task?> {
+        return repository.getTaskById(taskId)
     }
 }
 
