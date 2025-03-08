@@ -43,10 +43,7 @@ import androidx.compose.ui.unit.dp
 import com.example.taskmanager.model.Task
 import com.example.taskmanager.viewmodel.TaskViewModel
 import kotlinx.coroutines.launch
-
-
 import androidx.compose.material3.SnackbarDuration
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -157,39 +154,41 @@ fun TaskListScreen(
             } else {
                 LazyColumn {
                     items(filteredTasks, key = { it.id }) { task ->
-                        // Only allow swipe-to-complete for tasks that are not completed
                         SwipeToDeleteTask(
                             task = task,
                             viewModel = viewModel,
                             onDelete = {
                                 viewModel.deleteTask(task)
                                 coroutineScope.launch {
-                                    // Show snackbar with short duration
-                                    val result = snackbarHostState.showSnackbar(
-                                        message = "Task deleted",
-                                        actionLabel = "Undo",
-                                        duration = SnackbarDuration.Short // Short duration for the Snackbar
-                                    )
-                                    // Handle the undo action
-                                    if (result == SnackbarResult.ActionPerformed) {
-                                        viewModel.restoreTask(task) // Undo delete action
-                                        // Dismiss the Snackbar explicitly after "Undo"
-                                        snackbarHostState.currentSnackbarData?.dismiss()
+                                    // Ensure only one Snackbar is shown at a time
+                                    if (snackbarHostState.currentSnackbarData == null) {
+                                        val result = snackbarHostState.showSnackbar(
+                                            message = "Task deleted",
+                                            actionLabel = "Undo",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                        if (result == SnackbarResult.ActionPerformed) {
+                                            viewModel.restoreTask(task) // Undo delete action
+                                        }
                                     }
                                 }
                             },
                             onTaskClick = { onTaskClick(task.id) },
                             onComplete = { updatedTask ->
-                                // Only allow marking as complete if the task is not already completed
                                 if (!updatedTask.isCompleted) {
                                     viewModel.updateTask(updatedTask.copy(isCompleted = true)) // Mark task as completed
                                     coroutineScope.launch {
-                                        // Show snackbar for task completion
-                                        snackbarHostState.showSnackbar(
-                                            message = "Task marked as complete",
-                                            actionLabel = "Undo",
-                                            duration = SnackbarDuration.Short // Short duration for the Snackbar
-                                        )
+                                        // Ensure only one Snackbar is shown at a time
+                                        if (snackbarHostState.currentSnackbarData == null) {
+                                            val result = snackbarHostState.showSnackbar(
+                                                message = "Task marked as complete",
+                                                actionLabel = "Undo",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                            if (result == SnackbarResult.ActionPerformed) {
+                                                viewModel.updateTask(updatedTask.copy(isCompleted = false)) // Undo complete action
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -200,6 +199,7 @@ fun TaskListScreen(
         }
     }
 }
+
 @Composable
 fun SwipeToDeleteTask(
     task: Task,
@@ -237,8 +237,10 @@ fun SwipeToDeleteTask(
             }
     ) {
         TaskItem(task = task, onClick = onTaskClick)
-        // Optionally add UI elements to show progress for the swipe gesture (like an icon or change in background color)
     }
 }
+
+
+
 
 
