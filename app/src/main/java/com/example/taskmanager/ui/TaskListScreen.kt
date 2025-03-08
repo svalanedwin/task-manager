@@ -9,10 +9,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,6 +47,7 @@ import com.example.taskmanager.model.Task
 import com.example.taskmanager.viewmodel.TaskViewModel
 import kotlinx.coroutines.launch
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.ui.Alignment
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -150,7 +154,8 @@ fun TaskListScreen(
 
             // Task List with Swipe to Delete
             if (filteredTasks.isEmpty()) {
-                Text("No tasks available", style = MaterialTheme.typography.bodyLarge)
+                // Empty State UI
+                EmptyStateUI()
             } else {
                 LazyColumn {
                     items(filteredTasks, key = { it.id }) { task ->
@@ -199,7 +204,38 @@ fun TaskListScreen(
         }
     }
 }
+@Composable
+fun EmptyStateUI() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Illustration (You can replace this with your own illustration or icon)
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.List, // Replace with your custom illustration
+            contentDescription = "No Tasks",
+            modifier = Modifier.size(120.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier = Modifier.height(16.dp))
 
+        // Motivational Message
+        Text(
+            text = "No tasks yet!",
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Start by adding a new task and stay organized!",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+        )
+    }
+}
 @Composable
 fun SwipeToDeleteTask(
     task: Task,
